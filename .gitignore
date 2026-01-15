@@ -1,0 +1,10 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+flutter_*.png
+android/.gradle
+**/GeneratedPluginRegistrant.java
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+pubspec.lock

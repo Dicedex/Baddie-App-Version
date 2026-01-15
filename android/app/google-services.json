@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "670900854214",
+    "project_id": "baddie-app-version",
+    "storage_bucket": "baddie-app-version.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:670900854214:android:ab3d2711046ffffe0226c7",
+        "android_client_info": {
+          "package_name": "com.example.baddie_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBIdyzmPbuA-kO81nYGZCQ3BdJ0IPon2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
