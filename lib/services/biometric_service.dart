@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb; // Fixed: removed semicolon before 'show'
 import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
@@ -8,6 +8,7 @@ class BiometricService {
   /// Check if biometrics are available (mobile only)
   Future<bool> isBiometricAvailable() async {
     if (!_isMobile) return false;
+    if (kIsWeb) return false;
 
     try {
       final canCheck = await _auth.canCheckBiometrics;
@@ -24,8 +25,8 @@ class BiometricService {
 
     try {
       return await _auth.authenticate(
-        localizedReason: 'Unlock Baddie',
-              );
+        localizedReason: 'Please authenticate to Unlock Baddie',
+      );
     } catch (_) {
       return false;
     }

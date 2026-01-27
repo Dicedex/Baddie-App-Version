@@ -9,13 +9,28 @@ class AuthService {
     required String password,
   }) async {
     try {
+      print("Attempting login with: $email");
       await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return; // ✅ explicitly end
+      print("Login successful!");
     } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Error: ${e.code} - ${e.message}");
       throw Exception(e.message ?? 'Login failed');
+    }
+    catch (e) {
+    print("General Error: $e"); // 👈 ADD THIS
+    throw Exception('Check your credentials and try again');
+    }
+  }
+
+  /// NEW: FORGOT PASSWORD
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      rethrow;
     }
   }
 

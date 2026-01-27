@@ -38,6 +38,97 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // ─────────────────────────── Error Feedback (Toasts) ───────────────────────────
+ // ─────────────────────────── Professional Error Toasts ───────────────────────────
+
+  void _showErrorToast(dynamic e) {
+    String message = 'Check your credentials and try again';
+    
+    if (e is FirebaseAuthException) {
+      // This helps you see the exact code in your debug console
+      debugPrint("Firebase Error Code: ${e.code}");
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'This email is not registered. Please sign up first.';
+          break;
+        case 'invalid-credential':
+          // Modern Firebase returns this for both "user not found" and "wrong password"
+          message = 'Invalid email or password.';
+          break;
+        case 'wrong-password':
+          message = 'Incorrect password.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is badly formatted.';
+          break;
+        default:
+          message = e.message ?? 'Authentication failed';
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  // ─────────────────────────── Forgot Password Pop-up ───────────────────────────
+
+  void _showForgotPasswordDialog() {
+    // Pre-fill with whatever they already typed in the email field
+    final TextEditingController resetController = TextEditingController(text: _emailController.text);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your email and we will send you a reset link.'),
+            const SizedBox(height: 15),
+            TextField(
+              controller: resetController,
+              decoration: const InputDecoration(
+                labelText: 'Email Address', 
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (resetController.text.isEmpty) return;
+              try {
+                await AuthService().sendPasswordReset(resetController.text.trim());
+                if (!mounted) return;
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Reset link sent to your email!'), 
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                _showErrorToast(e);
+              }
+            },
+            child: const Text('Send Link'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ─────────────────────────── Biometric Login ───────────────────────────
   Future<void> _attemptBiometricLogin() async {
     final isAvailable = await _biometricService.isBiometricAvailable();
@@ -99,11 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/home');
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Login failed')),
-      );
+    } catch (e) {
+      _showErrorToast(e); // Professional toast notification
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -114,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome back'),
+        title: const Text('Welcome to Baddie'),
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
@@ -154,6 +242,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     validator: _passwordValidator,
                   ),
+
+                  // NEW: Forgot Password Link
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _showForgotPasswordDialog,
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -181,6 +279,22 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                           : const Text('Sign in'),
                     ),
+                  ),
+
+                  // NEW: Sign Up Navigation Link
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () => Navigator.pushNamed(context, '/signup'),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
