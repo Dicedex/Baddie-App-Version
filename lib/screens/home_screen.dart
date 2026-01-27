@@ -1,11 +1,14 @@
-import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Only import dart:io on non-web platforms
+import 'dart:io' show File, Platform;
 
 import 'swipe_screen.dart';
 import 'matches_screen.dart';
@@ -33,35 +36,67 @@ class UserPresenceService {
   }
 
   void _setOnline() {
-    _firestore.collection('users').doc(userId).set(
-      {'status': 'online', 'lastSeen': FieldValue.serverTimestamp()},
-      SetOptions(merge: true),
-    );
+    try {
+      _firestore.collection('users').doc(userId).set(
+        {'status': 'online', 'lastSeen': FieldValue.serverTimestamp()},
+        SetOptions(merge: true),
+      ).catchError((e) {
+        debugPrint('UserPresenceService: Error setting online status: $e');
+      });
+    } catch (e) {
+      debugPrint('UserPresenceService: Error in _setOnline: $e');
+    }
   }
 
   void _setOffline() {
-    _firestore.collection('users').doc(userId).set(
-      {'status': 'offline', 'lastSeen': FieldValue.serverTimestamp()},
-      SetOptions(merge: true),
-    );
+    try {
+      _firestore.collection('users').doc(userId).set(
+        {'status': 'offline', 'lastSeen': FieldValue.serverTimestamp()},
+        SetOptions(merge: true),
+      ).catchError((e) {
+        debugPrint('UserPresenceService: Error setting offline status: $e');
+      });
+    } catch (e) {
+      debugPrint('UserPresenceService: Error in _setOffline: $e');
+    }
   }
 
   void _listenIncomingCalls() {
-    _incomingCallSub = _firestore
-        .collection('calls')
-        .doc(userId)
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.exists) {
-        _incomingCallController.add(snapshot);
-      }
-    });
+    try {
+      _incomingCallSub = _firestore
+          .collection('calls')
+          .doc(userId)
+          .snapshots()
+          .listen(
+            (snapshot) {
+              try {
+                if (snapshot.exists) {
+                  _incomingCallController.add(snapshot);
+                }
+              } catch (e) {
+                debugPrint('UserPresenceService: Error processing snapshot: $e');
+              }
+            },
+            onError: (e) {
+              // Ignore permission denied errors - 'calls' collection may not exist or user may not have permission
+              if (!e.toString().contains('permission-denied')) {
+                debugPrint('UserPresenceService: Error listening to calls: $e');
+              }
+            },
+          );
+    } catch (e) {
+      debugPrint('UserPresenceService: Error in _listenIncomingCalls: $e');
+    }
   }
 
   void dispose() {
-    _incomingCallSub.cancel();
-    _incomingCallController.close();
-    _setOffline();
+    try {
+      _incomingCallSub.cancel();
+      _incomingCallController.close();
+      _setOffline();
+    } catch (e) {
+      debugPrint('UserPresenceService: Error disposing: $e');
+    }
   }
 }
 
@@ -99,53 +134,93 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        debugPrint('HomeScreen: No user logged in');
+        return;
+      }
 
-    // Initialize presence service with logged-in user
-    _presenceService = UserPresenceService(userId: user.uid);
+      debugPrint('HomeScreen: Initializing user: ${user.uid}');
 
-    // 1. Listen for incoming calls via Presence Service (Firestore)
-    _presenceService!.incomingCallStream.listen((snapshot) {
-      final data = snapshot.data() as Map<String, dynamic>?;
+      // Load profile from Firestore if not in memory
+      if (UserService.instance.currentUser.value == null) {
+        final profile = await UserService.instance.loadProfileFromFirestore();
+        debugPrint('HomeScreen: Profile loaded: ${profile?.name ?? 'Unknown'}');
+      } else {
+        debugPrint('HomeScreen: Profile already in memory: ${UserService.instance.currentUser.value?.name}');
+      }
 
-      if (data != null && data['status'] == 'calling') {
-        final callerId = data['callerId'] as String?;
-        if (callerId != null) {
+      if (!mounted) return;
+
+      // Initialize presence service with logged-in user
+      _presenceService = UserPresenceService(userId: user.uid);
+      debugPrint('HomeScreen: Presence service initialized');
+
+      if (!mounted) return;
+
+      // 1. Listen for incoming calls via Presence Service (Firestore)
+      _presenceService!.incomingCallStream.listen((snapshot) {
+        if (!mounted) return;
+        try {
+          final data = snapshot.data() as Map<String, dynamic>?;
+
+          if (data != null && data['status'] == 'calling') {
+            final callerId = data['callerId'] as String?;
+            if (callerId != null && mounted) {
+              _showIncomingCallDialog(callerId);
+            }
+          }
+        } catch (e) {
+          debugPrint('HomeScreen: Error processing incoming call: $e');
+        }
+      });
+
+      // 2. Listen via CallService
+      _callService.onIncomingCall((callerId, isVideo) {
+        if (mounted) {
           _showIncomingCallDialog(callerId);
         }
-      }
-    });
+      });
 
-    // 3. Listen via CallService
-    // FIX 2: Updated method name and arguments to match CallService definition
-    _callService.onIncomingCall((callerId, isVideo) {
-      // You can handle 'isVideo' here if you want to show a video icon
-      _showIncomingCallDialog(callerId);
-    });
+      debugPrint('HomeScreen: Call listeners initialized');
+    } catch (e) {
+      debugPrint('HomeScreen: Error initializing user: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading profile: $e')),
+        );
+      }
+    }
   }
 
   void _showIncomingCallDialog(String callerId) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Incoming Call'),
-        content: Text('User $callerId is calling you'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Decline'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to your CallScreen with caller info
-            },
-            child: const Text('Accept'),
-          ),
-        ],
-      ),
-    );
+    if (!mounted) return;
+    
+    try {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Incoming Call'),
+          content: Text('User $callerId is calling you'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Decline'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Navigate to your CallScreen with caller info
+              },
+              child: const Text('Accept'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint('HomeScreen: Error showing incoming call dialog: $e');
+    }
   }
 
   @override
@@ -156,7 +231,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Platform.isIOS ? _cupertino() : _material();
+    // Use Material design for all platforms (including web)
+    // Avoid Platform checks which don't work on web
+    return _material();
   }
 
   // ------------------ MATERIAL (ANDROID) ------------------
@@ -200,9 +277,97 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar _materialAppBar() {
     return AppBar(
-      title: const Text('Baddie'),
+      title: const Text(
+        'Baddie',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
+      centerTitle: true,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leadingWidth: 60,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            icon: const Icon(Icons.tune, color: Colors.black),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (_) => _buildFilterSheet(),
+              );
+            },
+          ),
+        ),
+      ),
       automaticallyImplyLeading: false,
       actions: [_profileAvatar()],
+    );
+  }
+
+  Widget _buildFilterSheet() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Filters',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          _buildFilterSection('Age Range', ['18-25', '25-35', '35-50', 'Any']),
+          const SizedBox(height: 20),
+          _buildFilterSection('Location Distance', ['10 km', '25 km', '50 km', '100+ km']),
+          const SizedBox(height: 20),
+          _buildFilterSection('Verified Only', [
+            'All',
+            'Verified Only',
+          ]),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF06595),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text(
+                'Apply Filters',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterSection(String title, List<String> options) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: options
+              .map((option) => FilterChip(
+                    label: Text(option),
+                    onSelected: (_) {},
+                  ))
+              .toList(),
+        ),
+      ],
     );
   }
 
@@ -290,11 +455,11 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(right: 12),
           child: GestureDetector(
             onTap: () {
-              Navigator.of(context).push(
-                Platform.isIOS
-                    ? CupertinoPageRoute(builder: (_) => const ProfileScreen())
-                    : MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
+              // Determine route type based on platform
+              final route = !kIsWeb && Platform.isIOS
+                  ? CupertinoPageRoute(builder: (_) => const ProfileScreen())
+                  : MaterialPageRoute(builder: (_) => const ProfileScreen());
+              Navigator.of(context).push(route);
             },
             child: avatar,
           ),

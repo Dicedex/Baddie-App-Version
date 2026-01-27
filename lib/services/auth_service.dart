@@ -46,13 +46,27 @@ class AuthService {
       if (credential.user != null) {
         try {
           await _db.collection('users').doc(credential.user!.uid).set({
+            'id': credential.user!.uid,
             'uid': credential.user!.uid,
             'email': email,
             'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
             'profileCompleted': false,
             'displayName': '',
+            'name': '',
+            'age': 18,
             'photoUrl': '',
+            'imageUrl': '',
             'bio': '',
+            'interests': [],
+            'personality': 'Casual',
+            'preferences': {
+              'maxDistance': 50,
+              'ageRangeStart': 18,
+              'ageRangeEnd': 40,
+              'verifiedOnly': false,
+            },
+            'status': 'online',
           });
           debugPrint("✅ Firestore record created.");
         } catch (dbError) {
@@ -102,6 +116,33 @@ class AuthService {
   /// LOGOUT
   Future<void> logout() async {
     await _auth.signOut();
+  }
+
+  /// GET CURRENT USER
+  User? getCurrentUser() {
+    return _auth.currentUser;
+  }
+
+  /// LOAD PROFILE FROM FIRESTORE
+  Future<Map<String, dynamic>?> loadProfileFromFirestore() async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) return null;
+
+      final docSnapshot = await _db
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+
+      if (docSnapshot.exists) {
+        debugPrint("Profile loaded from Firestore: ${docSnapshot.data()}");
+        return docSnapshot.data();
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Error loading profile: $e");
+      return null;
+    }
   }
 
 } // <--- MAKE SURE THIS IS THE VERY LAST LINE OF YOUR FILE

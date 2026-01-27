@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/profile.dart';
 import '../services/user_service.dart';
 
@@ -85,7 +87,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     });
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -110,6 +112,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         ),
         interests: _selectedInterests,
         personality: _selectedPersonality,
+        profileCompleted: true,
         preferences: {
           'maxDistance': _maxDistance,
           'ageRangeStart': _ageRange.start.toInt(),
@@ -118,7 +121,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         },
       );
 
+      // Save to local UserService
       UserService.instance.setUser(profile);
+
+      // Save to Firestore
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .set(profile.toMap(), SetOptions(merge: true));
+        debugPrint('Profile saved to Firestore for user: ${currentUser.uid}');
+      }
 
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/home');
@@ -257,68 +271,136 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 100,
+                  height: 120,
                   child: Row(
                     children: List.generate(3, (index) {
                       final image = _uploadedImages[index];
-                      return GestureDetector(
-                        onTap: () => _pickImageForIndex(index),
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: image == null ? () => _pickImageForIndex(index) : null,
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.6),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ),
-                          child: image == null
-                              ? const Icon(Icons.add_a_photo, size: 40)
-                              : Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: image.startsWith('http')
-                                          ? Image.network(
-                                              image,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : Image.file(
-                                              File(image),
-                                              fit: BoxFit.cover,
-                                            ),
-                                    ),
-                                    Positioned(
-                                      top: 4,
-                                      right: 4,
-                                      child: GestureDetector(
-                                        onTap: () => _removeImage(index),
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            color: Colors.red,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          padding: const EdgeInsets.all(4),
-                                          child: const Icon(
-                                            Icons.close,
-                                            size: 16,
-                                            color: Colors.white,
+                            child: image == null
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.add_a_photo,
+                                        size: 40,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Add Photo',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      // Image preview
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: image.startsWith('http')
+                                            ? Image.network(
+                                                image,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Image.file(
+                                                File(image),
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
+                                      // Gradient overlay on hover
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [
+                                              Colors.transparent,
+                                              Colors.black.withOpacity(0.4),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      // Delete button
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: GestureDetector(
+                                          onTap: () => _removeImage(index),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.red.shade600,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.3),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            padding: const EdgeInsets.all(6),
+                                            child: const Icon(
+                                              Icons.close,
+                                              size: 18,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      // Edit hint
+                                      Positioned(
+                                        bottom: 8,
+                                        left: 8,
+                                        right: 8,
+                                        child: Text(
+                                          'Photo ${index + 1}',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            shadows: [
+                                              Shadow(
+                                                color: Colors.black.withOpacity(0.5),
+                                                blurRadius: 3,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
                       );
                     }),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // Interests section
                 Text(

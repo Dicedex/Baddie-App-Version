@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart'; // Make sure this file exists!
 import 'package:flutter/material.dart';
 import 'screens/profile_setup.dart';
-import 'screens/splash_screen.dart';
 import 'widgets/auth_guard.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -32,7 +31,7 @@ class MyApp extends StatelessWidget {
 
       // FIX: Remove 'initialRoute: /' and 'routes: { /: ... }' 
       // because 'home' already defines the root.
-      home: const SplashScreen(),
+      home: const AuthGuard(),
 
       routes: {
         // REMOVED '/' from here to avoid the assertion error
