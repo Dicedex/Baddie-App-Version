@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'config/firebase_config.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -38,47 +39,47 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBAvwZpTAUe1mb6Kgn_TOovHEJ_QpGPtpc',
-    appId: '1:670900854214:web:9a915f00a37022430226c7',
-    messagingSenderId: '670900854214',
-    projectId: 'baddie-app-version',
-    authDomain: 'baddie-app-version.firebaseapp.com',
-    storageBucket: 'baddie-app-version.firebasestorage.app',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: FirebaseConfig.webApiKey,
+    appId: FirebaseConfig.webAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    authDomain: FirebaseConfig.authDomain,
+    storageBucket: FirebaseConfig.storageBucket,
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBBIdyzmPbuA-kO81nYGZCQ3BdJ0IPon2c',
-    appId: '1:670900854214:android:ab3d2711046ffffe0226c7',
-    messagingSenderId: '670900854214',
-    projectId: 'baddie-app-version',
-    storageBucket: 'baddie-app-version.firebasestorage.app',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: FirebaseConfig.androidApiKey,
+    appId: FirebaseConfig.androidAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    storageBucket: FirebaseConfig.storageBucket,
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDdJnEJuphJAdN7Jr82pX0gCssYUhXHzwo',
-    appId: '1:670900854214:ios:b216bd89592bef640226c7',
-    messagingSenderId: '670900854214',
-    projectId: 'baddie-app-version',
-    storageBucket: 'baddie-app-version.firebasestorage.app',
-    iosBundleId: 'com.example.baddieApp',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: FirebaseConfig.iosApiKey,
+    appId: FirebaseConfig.iosAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    storageBucket: FirebaseConfig.storageBucket,
+    iosBundleId: FirebaseConfig.iosBundleId,
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDdJnEJuphJAdN7Jr82pX0gCssYUhXHzwo',
-    appId: '1:670900854214:ios:b216bd89592bef640226c7',
-    messagingSenderId: '670900854214',
-    projectId: 'baddie-app-version',
-    storageBucket: 'baddie-app-version.firebasestorage.app',
-    iosBundleId: 'com.example.baddieApp',
+  static FirebaseOptions get macos => FirebaseOptions(
+    apiKey: FirebaseConfig.iosApiKey,
+    appId: FirebaseConfig.iosAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    storageBucket: FirebaseConfig.storageBucket,
+    iosBundleId: FirebaseConfig.iosBundleId,
   );
 
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBAvwZpTAUe1mb6Kgn_TOovHEJ_QpGPtpc',
-    appId: '1:670900854214:web:35b28d1985344d090226c7',
-    messagingSenderId: '670900854214',
-    projectId: 'baddie-app-version',
-    authDomain: 'baddie-app-version.firebaseapp.com',
-    storageBucket: 'baddie-app-version.firebasestorage.app',
+  static FirebaseOptions get windows => FirebaseOptions(
+    apiKey: FirebaseConfig.webApiKey,
+    appId: FirebaseConfig.windowsAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    authDomain: FirebaseConfig.authDomain,
+    storageBucket: FirebaseConfig.storageBucket,
   );
 }

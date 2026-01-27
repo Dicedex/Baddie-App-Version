@@ -8,3 +8,21 @@ android/.gradle
 ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 pubspec.lock
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+.env.prod
+.env.dev
+.env.staging
+.firebase/
+google-services.json
+GoogleService-Info.plist
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
