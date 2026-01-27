@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacementNamed(context, '/login');
     });
   }
@@ -24,13 +24,13 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.pinkAccent,
+        color: const Color.fromARGB(255, 242, 106, 22),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.favorite, size: 84, color: Colors.white),
             SizedBox(height: 16),
-            Text('Baddie', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
+            Text('Baddie', style: TextStyle(color: Colors.white, fontSize: 46, fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
             Text('Swipe. Match. Meet.', style: TextStyle(color: Colors.white70)),
           ],

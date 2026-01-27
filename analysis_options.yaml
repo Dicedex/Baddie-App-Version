@@ -1,1 +1,14 @@
 include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Explicitly enforce the rules you want
+    avoid_print: true
+    prefer_const_constructors: true
+    prefer_final_fields: true
+    use_build_context_synchronously: true
+
+analyzer:
+  errors:
+    # This turns the "Warning" into a "Red Squiggly" Error
+    avoid_print: error

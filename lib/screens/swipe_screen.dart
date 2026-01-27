@@ -242,10 +242,10 @@ class _SwipeScreenState extends State<SwipeScreen>
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 10,
