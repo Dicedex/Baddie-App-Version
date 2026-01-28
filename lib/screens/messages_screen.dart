@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/shimmer_loader.dart';
+import 'chat_screen.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -215,8 +216,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            child: const Padding(
+              padding: EdgeInsets.all(12),
               child: Row(
                 children: [
                   ShimmerLoader(
@@ -225,7 +226,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     borderRadius: 28,
                     margin: EdgeInsets.zero,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -235,7 +236,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           height: 14,
                           width: 150,
                           borderRadius: 6,
-                          margin: const EdgeInsets.only(bottom: 8),
+                          margin: EdgeInsets.only(bottom: 8),
                         ),
                         ShimmerLoader(
                           height: 12,
@@ -246,7 +247,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   ShimmerLoader(
                     height: 12,
                     width: 40,
@@ -302,7 +303,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
   Widget _buildConversationTile(_Conversation conversation) {
     return GestureDetector(
       onTap: () {
-        // Navigate to chat screen
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              recipientId: conversation.id,
+              recipientName: conversation.name,
+              recipientImageUrl: conversation.imageUrl,
+            ),
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

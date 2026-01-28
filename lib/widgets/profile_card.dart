@@ -24,7 +24,7 @@ class _ProfileCardState extends State<ProfileCard>
   late Animation<double> _scaleAnim;
   late Animation<double> _opacityAnim;
   late Animation<Offset> _slideAnim;
-  DateTime _lastTap = DateTime.now();
+  final DateTime _lastTap = DateTime.now();
 
   @override
   void initState() {
@@ -447,9 +447,9 @@ class _ProfileCardState extends State<ProfileCard>
               const SizedBox(height: 20),
               // Full bio
               if (widget.profile.bio.isNotEmpty) ...[
-                Text(
+                const Text(
                   'About',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -469,9 +469,9 @@ class _ProfileCardState extends State<ProfileCard>
               ],
               // Interests
               if (widget.profile.interests.isNotEmpty) ...[
-                Text(
+                const Text(
                   'Interests',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

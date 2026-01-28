@@ -240,8 +240,8 @@ class _MatchesScreenState extends State<MatchesScreen>
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
+          child: const Padding(
+            padding: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -249,19 +249,19 @@ class _MatchesScreenState extends State<MatchesScreen>
                   height: 120,
                   width: double.infinity,
                   borderRadius: 12,
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: EdgeInsets.only(bottom: 12),
                 ),
                 ShimmerLoader(
                   height: 14,
                   width: 100,
                   borderRadius: 6,
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: EdgeInsets.only(bottom: 8),
                 ),
                 ShimmerLoader(
                   height: 12,
                   width: double.infinity,
                   borderRadius: 4,
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: EdgeInsets.only(bottom: 8),
                 ),
                 ShimmerLoader(
                   height: 12,
@@ -289,9 +289,9 @@ class _MatchesScreenState extends State<MatchesScreen>
               color: Colors.grey[300],
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'No one has liked you yet',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
@@ -337,9 +337,9 @@ class _MatchesScreenState extends State<MatchesScreen>
               color: Colors.grey[300],
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'No matches yet',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,

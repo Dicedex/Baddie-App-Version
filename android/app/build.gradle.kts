@@ -1,11 +1,14 @@
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
     // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    
+    
+    // Add the Google services Gradle plugin
+
 }
 
 android {
@@ -14,8 +17,10 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+        // Required for desugaring (Java 8 features)
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -31,7 +36,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        minSdkVersion = 21
+        minSdk = flutter.minSdkVersion
     }
 
     buildTypes {
@@ -45,4 +50,16 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+// Import the Firebase BoM
+  implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+
+  // Required for desugaring (Java 8 features)
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+  // TODO: Add the dependencies for Firebase products you want to use
+  // When using the BoM, don't specify versions in Firebase dependencies
+  // https://firebase.google.com/docs/android/setup#available-libraries
 }

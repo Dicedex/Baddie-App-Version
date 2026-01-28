@@ -22,7 +22,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   List<String> _selectedInterests = [];
   String _selectedPersonality = 'Casual';
-  List<String?> _images = [null, null, null];
+  final List<String?> _images = [null, null, null];
   bool _saving = false;
 
   static const List<String> _allInterests = [

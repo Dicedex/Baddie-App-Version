@@ -97,13 +97,13 @@ class _AnimatedGradientButtonState extends State<AnimatedGradientButton>
           ),
           child: Center(
             child: widget.isLoading
-                ? SizedBox(
+                ? const SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                          AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
                 : Text(

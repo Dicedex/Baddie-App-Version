@@ -428,7 +428,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       () => _rememberMe = v ?? false,
                                     ),
                                     fillColor:
-                                        MaterialStateProperty.resolveWith(
+                                        WidgetStateProperty.resolveWith(
                                       (states) => Colors.white,
                                     ),
                                   ),

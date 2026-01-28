@@ -23,8 +23,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   // State variables
   bool _loading = false;
   String? _userEmail;
-  List<String?> _uploadedImages = [null, null, null];
-  List<String> _selectedInterests = [];
+  final List<String?> _uploadedImages = [null, null, null];
+  final List<String> _selectedInterests = [];
   String _selectedPersonality = 'Casual';
   double _maxDistance = 50;
   RangeValues _ageRange = const RangeValues(18, 40);

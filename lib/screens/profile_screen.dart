@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:shimmer/shimmer.dart';
 import '../services/user_service.dart';
 import '../models/profile.dart';
@@ -333,9 +332,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                 const SizedBox(height: 24),
                 // About section
                 if (profile.bio.isNotEmpty) ...[
-                  Text(
+                  const Text(
                     'About',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
@@ -366,9 +365,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ],
                 // Interests section
                 if (profile.interests.isNotEmpty) ...[
-                  Text(
+                  const Text(
                     'Interests',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
@@ -411,9 +410,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                   const SizedBox(height: 28),
                 ],
                 // Preferences section
-                Text(
+                const Text(
                   'Discovery Preferences',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,

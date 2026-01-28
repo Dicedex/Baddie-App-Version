@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ------------------ MATERIAL (ANDROID) ------------------
   Widget _material() {
     return Scaffold(
-      appBar: _materialAppBar(),
+      appBar: _index == 0 ? _materialAppBar() : null,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         transitionBuilder: (child, anim) => FadeTransition(
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: const Text(
         'Baddie',
         style: TextStyle(
-          fontSize: 28,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
@@ -290,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       leadingWidth: 60,
       leading: Padding(
-        padding: const EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.only(left: 10),
         child: Align(
           alignment: Alignment.centerLeft,
           child: IconButton(

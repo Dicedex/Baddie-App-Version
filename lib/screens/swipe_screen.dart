@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/profile.dart';
 import '../widgets/profile_card.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SwipeScreen extends StatefulWidget {
   const SwipeScreen({super.key});
